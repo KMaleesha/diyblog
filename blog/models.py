@@ -2,58 +2,7 @@ from django.db import models
 from django.urls import reverse
 from django.db.models import UniqueConstraint
 from django.db.models.functions import Lower
-
-
-class Genre(models.Model):
-    """Model representing a book genre."""
-    name = models.CharField(
-        max_length=200,
-        unique=True,
-        help_text="Enter a blog genre (e.g. Science Fiction, French Poetry etc.)"
-    )
-
-    def __str__(self):
-        """String for representing the Model object."""
-        return self.name
-
-    def get_absolute_url(self):
-        """Returns the url to access a particular genre instance."""
-        return reverse('genre-detail', args=[str(self.id)])
-
-    class Meta:
-        constraints = [
-            UniqueConstraint(
-                Lower('name'),
-                name='genre_name_case_insensitive_unique',
-                violation_error_message = "Genre already exists (case insensitive match)"
-            ),
-        ]
-        
-        
-        
-class Language(models.Model):
-    """Model representing a Language (e.g. English, French, Japanese, etc.)"""
-    name = models.CharField(max_length=200,
-                            unique=True,
-                            help_text="Enter the blog's natural language (e.g. English, French, Japanese etc.)")
-
-    def get_absolute_url(self):
-        """Returns the url to access a particular language instance."""
-        return reverse('language-detail', args=[str(self.id)])
-
-    def __str__(self):
-        """String for representing the Model object (in Admin site etc.)"""
-        return self.name
-
-    class Meta:
-        constraints = [
-            UniqueConstraint(
-                Lower('name'),
-                name='language_name_case_insensitive_unique',
-                violation_error_message = "Language already exists (case insensitive match)"
-            ),
-        ]
-        
+from django.contrib.auth.models import User
 
 
 class Blogger(models.Model):
@@ -79,7 +28,6 @@ class Blogger(models.Model):
         return f'{self.last_name}, {self.first_name}'
 
 
-
 class Blog(models.Model):
     """Model representing a blog post."""
     title = models.CharField(max_length=200)
@@ -95,15 +43,20 @@ class Blog(models.Model):
         """String representation of a blog post."""
         return self.title
     
-    
 
 class Comment(models.Model):
-    """Model representing a comment on a blog post."""
-    blog = models.ForeignKey(Blog, on_delete=models.CASCADE, related_name="comments")
-    commenter_name = models.CharField(max_length=100)
+    """Model representing a blog comment."""
+    blog = models.ForeignKey(Blog, on_delete=models.CASCADE)
+    commenter = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,  
+        blank=True     
+    )
     comment_text = models.TextField()
-    comment_date = models.DateTimeField(auto_now_add=True)
-
+    created_at = models.DateTimeField(auto_now_add=True)
+    
     def __str__(self):
         """String representation of a comment."""
-        return f'Comment by {self.commenter_name} on {self.blog.title}'
+        commenter_name = self.commenter.username if self.commenter else "Anonymous"
+        return f'Comment by {commenter_name} on {self.blog.title}'

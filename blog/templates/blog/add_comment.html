@@ -1,0 +1,11 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+<p>Post your comment for: <a href="{{ blog.get_absolute_url }}">{{ blog.title }}</a></p>
+<form method="POST">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <p>Enter comment about blog here.</p>
+    <button type="submit" >submit</button>
+</form>
+{% endblock %}

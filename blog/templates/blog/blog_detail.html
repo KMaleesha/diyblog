@@ -7,8 +7,15 @@
 <p>Author: <a href="{{ blog.blogger.get_absolute_url }}">{{ blog.blogger }}</a></p>
 <p>Description</p>
 <p>{{blog.description}}</p>
-<div style="margin-left:20px;margin-top:20px">
-<h4>Comments</h4>
 
+<div style="margin-left:20px;margin-top:20px">
+    <h4>Comments</h4>
+    {% for comment in blog.comment_set.all %}
+        <p>{{ comment.commenter.username }} ({{ comment.created_at|date:"F d, Y" }} at {{ comment.created_at|time:"H:i" }}) - {{ comment.comment_text }}</p>
+    {% empty %}
+        <p>No comments yet.</p>
+    {% endfor %}
 </div>
+
+<p><a href="{% url 'add_comment' blog.id %}" >Add a new comment</a></p>
 {% endblock %}
